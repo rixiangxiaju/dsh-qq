@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="QQ bridge">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a8cff"/>
+      <stop offset="0.55" stop-color="#2fb6ff"/>
+      <stop offset="1" stop-color="#6ee7d7"/>
+    </linearGradient>
+    <linearGradient id="bubble" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eaf6ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)"/>
+  <path d="M32 11c11.6 0 21 7.6 21 17 0 9.4-9.4 17-21 17-2.1 0-4.2-.25-6.1-.7l-8.4 5.3c-1.1.7-2.5-.2-2.3-1.5l1.2-6.6C11.3 38.4 11 33.5 11 28c0-9.4 9.4-17 21-17z" fill="url(#bubble)"/>
+  <ellipse cx="24.5" cy="25.5" rx="3.1" ry="3.9" fill="#123a5c"/>
+  <ellipse cx="39.5" cy="25.5" rx="3.1" ry="3.9" fill="#123a5c"/>
+  <circle cx="25.6" cy="24.1" r="1.05" fill="#ffffff"/>
+  <circle cx="40.6" cy="24.1" r="1.05" fill="#ffffff"/>
+  <path d="M32 29.4l4 2.6-4 2.6z" fill="#ffab3d"/>
+  <path d="M20 37.5c2.6 2.2 7.4 3.6 12 3.6s9.4-1.4 12-3.6" fill="none" stroke="#bcd9ef" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="50" cy="14" r="3.2" fill="#ffffff" fill-opacity="0.9"/>
+  <circle cx="50" cy="14" r="1.4" fill="#2fb6ff"/>
+</svg>

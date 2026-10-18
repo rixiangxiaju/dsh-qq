@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "title": "QQ Bridge",
+    "description": "Chat with DSH from QQ through OneBot v11 (NapCat / LLOneBot): one session per contact, with a custom persona, QQ faces, image stickers and kaomoji."
+  },
+  "config": {
+    "enabled": "Enable",
+    "personaName": "Persona name",
+    "personaPrompt": "Persona",
+    "whitelist": "Allowed QQ numbers",
+    "allowTools": "Allow DSH tools"
+  }
+}

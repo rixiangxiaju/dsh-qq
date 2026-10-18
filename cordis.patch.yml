@@ -1,0 +1,5 @@
+# dsh-qq bundle patch：把一个纯宿主插件行插进 profile。
+# 插件没有 client 端：设置页由 dsh-settings 根据 Config 里的 volatile 字段自动生成。
+- insert:
+    - id: qq-bridge
+      name: dsh-qq

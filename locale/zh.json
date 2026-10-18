@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "title": "QQ 桥接",
+    "description": "通过 OneBot v11（NapCat / LLOneBot）在 QQ 上和 DSH 直接对话：每个联系人一个独立会话，人设、小黄脸、表情包与颜文字都可自定义。"
+  },
+  "config": {
+    "enabled": "总开关",
+    "personaName": "人设名字",
+    "personaPrompt": "人设正文",
+    "whitelist": "白名单 QQ 号",
+    "allowTools": "允许使用 DSH 工具"
+  }
+}

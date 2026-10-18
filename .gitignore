@@ -1,1 +1,17 @@
+# 依赖与构建产物
 node_modules/
+*.tgz
+*.log
+
+# 本地运行产生的东西（不属于插件本身）
+stickers/
+persona.md
+state.json
+allow.txt
+settings.json
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
