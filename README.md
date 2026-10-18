@@ -176,6 +176,8 @@ package.bot.bak        NapCat 入口的 package.json（只把 main 换成 ./napc
   - 具名：`~/.dsh/qq-bridge/stickers/` 根目录下「文件名就是表情名」
   - **风格包**：子目录名就是包名，`[[sticker:可爱]]` 会从该包里随机发一张
   - 也可以 `stickerMap` 写 `名字=路径或URL`
+  - **自动补图**：`stickerAutoRate`（默认 `0.35`）——模型这轮没发表情包时，按这个概率自动补一张可爱系的。
+    `0` = 完全交给模型，`1` = 每轮都带一张
 - 一条回复最多 2 张表情包 + 2 个小黄脸（防刷屏）
 
 ## 主动消息与追问

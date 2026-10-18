@@ -171,6 +171,8 @@ const Config = z.object({
   styleEnabled: z.boolean().default(true).volatile().description('每轮换一种说话形状（只回一个字 / 连发三条 / 岔开话题 / 只发表情…），避免腔调单一'),
 
   affinityEnabled: z.boolean().default(true).volatile().description('好感度系统：她按你说的内容实时加减好感，关系深浅决定语气、主动性、追视频率；每次 /清空 都重新认识'),
+
+  stickerAutoRate: z.number().default(0.35).volatile().description('自动补表情包的概率（0–1）：模型这轮没发表情包时，按这个概率随机补一张可爱系的'),
 });
 
 /** 解开 schemastery 的 volatile 包装。 */
