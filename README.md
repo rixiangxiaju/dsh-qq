@@ -74,6 +74,48 @@ plugin_manager install_bundle  target: /path/to/dsh-qq
 给机器人发一条私聊，然后在 DSH 里让它调一次 `qq_status`：
 能看到「WebSocket 已连接 · 机器人 QQ xxx」就通了。
 
+## 在「个人 QQ」和「机器人 QQ」之间切换
+
+NapCat 是**改 QQ 的启动入口**（`resources\app\package.json` 的 `main` 字段）注入的，所以同一份
+QQ 安装不能同时当个人号用——启动入口只有一个。想用同一个号/同一台电脑，就得切换。
+
+`tools/` 里带了一个通用切换脚本（**不写死版本号**，自动找 `versions\*` 下真正带 `package.json` 的那份）：
+
+| 文件 | 作用 |
+| --- | --- |
+| `tools/switch-qq.ps1` | 主脚本：停止进程 → 改 `main` → 无 BOM 写盘 → 读回校验 → 启动 |
+| `tools/switch-to-bot.bat` | 双击切到机器人（会问一次机器人 QQ 号，之后记住） |
+| `tools/switch-to-personal.bat` | 双击切回个人 QQ |
+
+### 用法
+
+把这三个文件**复制到 QQ 安装目录**（与 `QQ.exe` 同级），然后：
+
+- 双击 `switch-to-personal.bat` → 停机器人 → 还原官方入口 → 启动 QQ（登录你自己的号）
+- 双击 `switch-to-bot.bat` → 停 QQ → 改回 NapCat 入口 → 启动 NapCat（机器人上线）
+
+也可以命令行：
+
+```powershell
+# 切机器人
+.\switch-qq.ps1 -Mode bot -Account 1973631352
+# 切个人
+.\switch-qq.ps1 -Mode personal
+# 只看会做什么，不动任何东西
+.\switch-qq.ps1 -Mode bot -DryRun
+```
+
+脚本把「原始入口」和「机器人 QQ 号」记在 QQ 目录下的 `qq-switch.state.json`，
+日志写在 `qq-switch.log`（每一步都有，失败会停住并说明原因，不会静默）。
+
+### 注意
+
+- **切换期间收到的 QQ 消息会丢**（NapCat 停了就没人接），别在等消息时切
+- 脚本会**结束所有 QQ.exe 进程**，包括你正在用的个人 QQ
+- 必须用 Windows 自带的 PowerShell 跑（脚本会自动带 `-ExecutionPolicy Bypass`，不用改系统策略）
+- 每次切换约 10–15 秒；切完插件会自动重连，不用重启 DSH
+- 如果只想「机器人一直在 + 自己也能聊天」，更省事的办法是**机器人放电脑上常驻，自己用手机 QQ**
+
 ## 关系系统（好感度 + 认识时长）
 
 每个会话有独立的好感度（0–100，新认识 15）和认识时间。
