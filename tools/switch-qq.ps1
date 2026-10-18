@@ -37,7 +37,7 @@ param(
     [ValidateSet('bot', 'personal')]
     [string]$Mode,
 
-    [string]$QQDir = (Split-Path -Parent $(if ($PSScriptRoot) { $PSScriptRoot } else { $MyInvocation.MyCommand.Path })),
+    [string]$QQDir = '',
 
     [string]$Account = '',
 
@@ -51,6 +51,13 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# 没传 -QQDir 时：默认就是脚本所在目录（脚本与 QQ.exe 放在一起）
+if ([string]::IsNullOrWhiteSpace($QQDir)) {
+    $scriptDir = if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+    $QQDir = $scriptDir
+}
+
 $stateFile = Join-Path $QQDir 'qq-switch.state.json'
 $logFile = Join-Path $QQDir 'qq-switch.log'
 
@@ -61,8 +68,8 @@ function Log([string]$message) {
 }
 
 function Fail([string]$message) {
-    Log "错误：$message"
     Write-Host "错误：$message" -ForegroundColor Red
+    try { Add-Content -Path $logFile -Value "$(Get-Date -Format 'HH:mm:ss')  错误：$message" -Encoding UTF8 } catch { }
     exit 1
 }
 
@@ -149,23 +156,41 @@ if ($DryRun -or $SkipProcesses) {
     if (Get-Process -Name 'QQ' -ErrorAction SilentlyContinue) { Fail 'QQ 没有完全退出，请稍后再试（或手动在任务管理器结束 QQ.exe）。' }
 }
 
-# ---------- 4. 改 main ----------
-if ($currentMain -ne $targetMain) {
-    $package.main = $targetMain
-    $json = $package | ConvertTo-Json -Depth 32
-    if ($DryRun) {
-        Log "[DryRun] 将把 main 改成 $targetMain"
-    } else {
-        # 必须无 BOM：带 BOM 的 package.json 会让 QQ 报「文件损坏」
-        [System.IO.File]::WriteAllText($pkgPath, $json + "`n", (New-Object System.Text.UTF8Encoding($false)))
-        $check = Get-Content $pkgPath -Raw | ConvertFrom-Json
-        $head = [System.IO.File]::ReadAllBytes($pkgPath)[0]
-        Log "写入后 main：$($check.main)"
-        if ($head -eq 239) { Fail '写入的 package.json 带了 BOM，请手动检查。' }
-        if ([string]$check.main -ne $targetMain) { Fail '写入后校验失败：main 没变成目标值。' }
+# ---------- 4. 用备份整体覆盖（必须字节级一致，QQ 会校验 package.json 完整性） ----------
+$personalBak = Join-Path $QQDir 'package.personal.bak'
+$botBak = Join-Path $QQDir 'package.bot.bak'
+
+# 首次运行：缺哪个备份就按当前文件 / 文本替换生成
+if (-not (Test-Path $personalBak)) {
+    if ($currentMain.Contains('napcat')) {
+        Fail "缺少 $personalBak（原始 package.json 备份）。请先把 QQ 恢复成官方入口再跑一次，或手动放一份原始 package.json 为 package.personal.bak。"
     }
+    Copy-Item $pkgPath $personalBak -Force
+    Log "已保存原始 package.json → package.personal.bak"
+}
+if (-not (Test-Path $botBak)) {
+    # 只替换 main 的值，其余字节原样保留
+    $text = [System.IO.File]::ReadAllText($personalBak)
+    $patched = [regex]::Replace($text, '("main"\s*:\s*")[^"]*(")', { param($m) $m.Groups[1].Value + $state.botMain + $m.Groups[2].Value })
+    [System.IO.File]::WriteAllText($botBak, $patched, (New-Object System.Text.UTF8Encoding($false)))
+    Log "已生成 package.bot.bak（main = $($state.botMain)）"
+}
+
+$sourceBak = if ($Mode -eq 'bot') { $botBak } else { $personalBak }
+if (-not (Test-Path $sourceBak)) { Fail "找不到备份文件 $sourceBak" }
+
+$currentBytes = [System.IO.File]::ReadAllBytes($pkgPath)
+$sourceBytes = [System.IO.File]::ReadAllBytes($sourceBak)
+
+if ($DryRun) {
+    Log "[DryRun] 将用 $([System.IO.Path]::GetFileName($sourceBak))（$($sourceBytes.Length) 字节）覆盖 package.json（当前 $($currentBytes.Length) 字节）"
 } else {
-    Log 'main 已经是目标值，不用改'
+    Copy-Item $sourceBak $pkgPath -Force
+    $check = Get-Content $pkgPath -Raw | ConvertFrom-Json
+    $head = [System.IO.File]::ReadAllBytes($pkgPath)[0]
+    Log "写入后 main：$($check.main)（$((Get-Item $pkgPath).Length) 字节）"
+    if ($head -eq 239) { Fail '写入的 package.json 带了 BOM，请手动检查。' }
+    if ([string]$check.main -ne $targetMain) { Fail '写入后校验失败：main 没变成目标值。' }
 }
 
 # ---------- 5. 保存状态 ----------

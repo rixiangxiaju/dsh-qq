@@ -83,9 +83,14 @@ QQ 安装不能同时当个人号用——启动入口只有一个。想用同�
 
 | 文件 | 作用 |
 | --- | --- |
-| `tools/switch-qq.ps1` | 主脚本：停止进程 → 改 `main` → 无 BOM 写盘 → 读回校验 → 启动 |
+| `tools/switch-qq.ps1` | 主脚本：停止进程 → **整文件覆盖** `package.json` → 校验 → 启动 |
 | `tools/switch-to-bot.bat` | 双击切到机器人（会问一次机器人 QQ 号，之后记住） |
 | `tools/switch-to-personal.bat` | 双击切回个人 QQ |
+
+> ⚠️ **为什么必须整文件覆盖**：QQ 启动时会校验 `package.json` 的完整性。任何「重写」操作
+> ——哪怕只是重新序列化一遍 JSON（格式变多几个空格）——都会让新 QQ 静默退出（exit code 0，不报错、
+> 不写日志），看上去就是「点了没反应」。所以脚本用首次运行时保存的 `package.personal.bak` /
+> `package.bot.bak` 做**字节级拷贝**，绝不重新生成 JSON。
 
 ### 用法
 
@@ -107,6 +112,15 @@ QQ 安装不能同时当个人号用——启动入口只有一个。想用同�
 
 脚本把「原始入口」和「机器人 QQ 号」记在 QQ 目录下的 `qq-switch.state.json`，
 日志写在 `qq-switch.log`（每一步都有，失败会停住并说明原因，不会静默）。
+
+第一次运行时脚本会自动生成两份快照：
+
+```
+package.personal.bak   官方入口的 package.json（当前文件原样保存）
+package.bot.bak        NapCat 入口的 package.json（只把 main 换成 ./napcat/napcat.mjs）
+```
+
+之后每次切换就是把对应的那份**原样复制**回去。
 
 ### 注意
 
