@@ -178,6 +178,8 @@ const Config = z.object({
 
   replyDelayEnabled: z.boolean().default(true).volatile().description('打字停顿：回复前随机停顿 1.5–12 秒，别秒回（心情烦/困时更急）'),
   replyDelayMaxSeconds: z.number().default(12).volatile().description('打字停顿的上限（秒）'),
+
+  terseRate: z.number().default(0.25).volatile().description('极简回复概率（0–1）：平时闲聊时，按这个概率只说一句就停（提问和深聊不触发）'),
 });
 
 /** 解开 schemastery 的 volatile 包装。 */
